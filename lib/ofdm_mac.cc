@@ -63,6 +63,9 @@ void app_in (pmt::pmt_t msg) {
 	size_t       msg_len;
 	const char   *msdu;
 
+	// dict
+	pmt::pmt_t dict = pmt::make_dict();
+
 	if(pmt::is_eof_object(msg)) {
 		message_port_pub(pmt::mp("phy out"), pmt::PMT_EOF);
 		detail().get()->set_done(true);
@@ -77,6 +80,7 @@ void app_in (pmt::pmt_t msg) {
 
 	} else if(pmt::is_pair(msg)) {
 
+		dict = pmt::car(msg);
 		msg_len = pmt::blob_length(pmt::cdr(msg));
 		msdu = reinterpret_cast<const char *>(pmt::blob_data(pmt::cdr(msg)));
 
@@ -90,8 +94,6 @@ void app_in (pmt::pmt_t msg) {
 	char   *psdu;
 	generate_mac_data_frame(msdu, msg_len, &psdu, &psdu_length);
 
-	// dict
-	pmt::pmt_t dict = pmt::make_dict();
 	dict = pmt::dict_add(dict, pmt::mp("crc_included"), pmt::PMT_T);
 
 	// blob
